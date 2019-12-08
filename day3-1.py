@@ -37,7 +37,7 @@ def nextPoint (origin:[], dir:str, len:int) -> []:
     else:
         raise Exception('Bad direction')
 
-def parse(inputPath):
+def parse(inputPath:str) -> []:
     return inputPath.split(',')
 
 def parseSpec(spec:str) -> []:
