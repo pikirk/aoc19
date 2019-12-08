@@ -1,6 +1,24 @@
 import copy
+import sys
 
-def nextPoint (origin, dir, len):
+DIR = 0
+LEN = 1
+
+class Point:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        self.s = str(x) + ',' + str(y)
+    
+    @staticmethod
+    def toString(x, y):
+        return str(x) + ',' + str(y)
+
+def nextPoint (origin:[], dir:str, len:int) -> []:
+    """
+    For a given direction and length, calculates the next cartesian
+    point
+    """
     if dir == 'R':
         return [(origin[0] + len), origin[1]]
     elif dir == 'L':
@@ -12,86 +30,93 @@ def nextPoint (origin, dir, len):
     else:
         raise Exception('Bad direction')
 
-def hitTest(pt1, pt2):
-    if (pt1[0] == pt2[0]) and (pt1[1] == pt2[1]): return True
-    return False
-
-def distanceToPort(pt):
-    return abs(pt[0]) + abs(pt[1])
-
-# ex. R456,U344,D4566
 def parse(inputs):
-    retValue = []
-    for i in range( len(inputs) ):
-        s = inputs[i]
-        retValue.append( list( (s.split(',') ) ) )
-    return retValue
+    return inputs.split(',')
 
 # ex. R456
-def parseSpec(spec):
+def parseSpec(spec:str) -> []:
+    """
+    Parses a path instruction
+    Ex. R345 yield ['R',345]
+    """
     dir = spec[0]
     take = len(spec)
     size = spec[1:take] 
-    return [dir, int (size.strip())]
+    return [dir, int (size.strip('\n'))]
 
-# # plots both lines based on the direction specs and
-# # evaluates if lines intersect during the plot
-# # we only have 2 lines to worry about for this puzzle
-# def plotAndEval(paths):
-#     retValue = []
+def expand (origin:[], dir:str, len:int) -> []:
+    """
+    Calculates all cartesian coordinates from a start point
+    for a zero slope segment
+    """
+    pts = []
+    if dir == 'R':
+        for x in range(len):
+            p = Point( origin[0] + (x+1), origin[1])
+            pts.append(p)
 
-#     ob = 0
-#     if len(paths[0]) > len(paths[1]):                       # determine max outer boundary
-#         ob = len(paths[0])
-#     else: 
-#         ob = len(paths[1]) 
+    elif dir == 'L':
+        for x in range(len):
+            p = Point(origin[0] - (x+1), origin[1])
+            pts.append(p)
 
-#     origin1 = [0,0] 
-#     origin2 = [0,0]
-
-#     for curIndex in range(ob):
-#         first = parseSpec(paths[0][curIndex])               # plot first line
-#         pt1 = nextPoint(origin1, first[0], first[1])
-#         origin1 = pt1
-                                            
-#         if ( curIndex <= len(paths[1]) ):                   # plot second line
-#             second = parseSpec(paths[1][curIndex])  
-#             pt2 = nextPoint(origin2, second[0], second[1])
-#             origin2 = pt2
-
-#         if (hitTest(pt1, pt2)):
-#             retValue.append(pt1)
+    elif dir == 'U':
+        for x in range(len):
+            p = Point( origin[0], origin[1] + (x+1) )
+            pts.append(p)
     
-#     return 
+    elif dir == 'D':
+        for x in range(len):
+            p = Point(origin[0], origin[1] - (x+1))
+            pts.append(p)
+    else:
+        raise Exception('Bad direction')
 
-def plotPoints(path):
-    line = set()
+    return pts
+
+def plotPoints(specPath:[]) -> []:
+    """
+    Evaluates line instructions and calculates all cartesian
+    coordinate for its path
+    """
+    retvalue = []
+    seen = set()
     origin = [0,0]
-    for index in range(len(path)):
-        spec = parseSpec(path[index])
-        next = nextPoint(origin, spec[0], spec[1])
-        line.add(str(next[0]) + ',' + str(next[1]))
-        origin = next
-    return line
+    seen.add(Point.toString(0,0))
+    specs = parse(specPath)
+    for s in range(len(specs)):
+        spec = parseSpec(specs[s])
+        pts = expand(origin, spec[DIR], spec[LEN])
+        pts.append( Point(origin[0], origin[1] ) )
+        origin = nextPoint(origin, spec[DIR], spec[LEN])
+        retvalue = retvalue + pts
+    
+    return retvalue   
 
-def plotAndEval(paths):
-    firstSet = plotPoints(paths[0])
-    secondSet = plotPoints(paths[1])
-    diff = firstSet.intersection(secondSet)   # get the common points in poth sets
-    print(diff)
+    
+def distanceToPort(pt:[]) -> int:
+    return abs(pt[0]) + abs(pt[1])        
 
+################################################
+## Start Puzzle Processing
+################################################
 
-# outline
-# read and parse input
-# starting at origin (0,0) calculate next point for each direction code
-# peform a hit test on the next points
-# if true, add to intersection list
-# get the shortest distance from origin (0,0) for all intersections
+# read puzzle input
+inputs = open('day3-1-input.txt', 'r').readlines()
 
-# test inputs
-inputs = open('test.txt', 'r').readlines()
-result = parse(inputs)
-plotAndEval(result)
+# plot lines
+line1 = plotPoints(inputs[0])
+line2 = plotPoints(inputs[1])
 
+# hash the stringified coordinates
+line1PointSet = set()
+line1PointSet.update( obj.s for obj in line1 )
+line2PointSet = set()
+line2PointSet.update( obj.s for obj in line2 )
 
+# find common points in both sets - these represent
+# the line intersections
+diff = line1PointSet.intersection(line2PointSet)
+
+# calculate manhattan distance
 
