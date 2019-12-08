@@ -5,15 +5,22 @@ DIR = 0
 LEN = 1
 
 class Point:
-    def __init__(self, x, y):
+    def __init__(self, x:int, y:int):
         self.x = x
         self.y = y
         self.s = str(x) + ',' + str(y)
     
     @staticmethod
-    def toString(x, y):
+    def toString(x:int, y:int) -> str:
         return str(x) + ',' + str(y)
-
+    
+    @staticmethod
+    def toArray(xy:str) -> []:
+        c = xy.split(',')
+        c[0] = int(c[0]) 
+        c[1] = int(c[1])
+        return c
+    
 def nextPoint (origin:[], dir:str, len:int) -> []:
     """
     For a given direction and length, calculates the next cartesian
@@ -30,8 +37,8 @@ def nextPoint (origin:[], dir:str, len:int) -> []:
     else:
         raise Exception('Bad direction')
 
-def parse(inputs):
-    return inputs.split(',')
+def parse(inputPath):
+    return inputPath.split(',')
 
 # ex. R456
 def parseSpec(spec:str) -> []:
@@ -76,26 +83,42 @@ def expand (origin:[], dir:str, len:int) -> []:
 
 def plotPoints(specPath:[]) -> []:
     """
-    Evaluates line instructions and calculates all cartesian
-    coordinate for its path
+    Evaluates line instructions in the spec path and calculates all cartesian
+    coordinate in each segment
     """
-    retvalue = []
+    retval = []
     seen = set()
     origin = [0,0]
     seen.add(Point.toString(0,0))
     specs = parse(specPath)
-    for s in range(len(specs)):
+    for s in range(len(specs)):                         # need to de-dupe start/end pts
         spec = parseSpec(specs[s])
         pts = expand(origin, spec[DIR], spec[LEN])
         pts.append( Point(origin[0], origin[1] ) )
         origin = nextPoint(origin, spec[DIR], spec[LEN])
-        retvalue = retvalue + pts
+        retval = retval + pts
     
-    return retvalue   
+    return retval   
 
-    
-def distanceToPort(pt:[]) -> int:
-    return abs(pt[0]) + abs(pt[1])        
+def calculateClosest(pts:set) -> int:
+    """
+    Calculates the closest manhattan distance for all points
+    based on 0,0 origin
+    """
+    retval = 0
+    index = 0
+    for hash in pts:
+        p = Point.toArray(hash)
+        d = abs(p[0]) + abs(p[1])
+
+        if ( index == 0 ):
+            retval = d
+        elif( d > 0 and d < retval):
+            retval = d
+
+        index = index + 1
+
+    return retval
 
 ################################################
 ## Start Puzzle Processing
@@ -119,4 +142,8 @@ line2PointSet.update( obj.s for obj in line2 )
 diff = line1PointSet.intersection(line2PointSet)
 
 # calculate manhattan distance
+d = calculateClosest(diff)
+print('Answer = ' + str(d))
+
+
 
