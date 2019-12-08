@@ -99,28 +99,9 @@ def plotPoints(specPath:[]) -> []:
     
     return retval   
 
-def calculateClosest(pts:set) -> int:
-    """
-    Calculates the closest manhattan distance for all points
-    based on 0,0 origin
-    """
-    retval = 0
-    index = 0
-    for hash in pts:
-        p = Point.toArray(hash)
-        d = abs(p[0]) + abs(p[1])
-
-        if ( index == 0 ):
-            retval = d
-        elif( d > 0 and d < retval):
-            retval = d
-
-        index = index + 1
-
-    return retval
-
-def countShortestPath(path:list, intersections:[]) -> int:
-    print 'TODO'
+def calculateShortestPath(path:list, intersections:set) -> int:
+    print ('TODO')
+    return -1
 
 ################################################
 ## Start Puzzle Processing
