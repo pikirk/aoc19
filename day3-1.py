@@ -40,7 +40,6 @@ def nextPoint (origin:[], dir:str, len:int) -> []:
 def parse(inputPath):
     return inputPath.split(',')
 
-# ex. R456
 def parseSpec(spec:str) -> []:
     """
     Parses a path instruction
