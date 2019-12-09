@@ -100,25 +100,36 @@ def plotPoints(specPath:[]) -> []:
     return retval   
 
 def calculateShortestPath(path:list, intersections:set) -> int:
-    print ('TODO')
-    return -1
+    segments = []
+    for pt in intersections:
+        c = 0
+        for p in path:
+            c = c + 1
+            if ( (p.intersection and p.s == pt) and p.s != '0,0'):
+                segments.append(c)
+                c = 0
+            
+
+    return min(segments)
 
 ################################################
 ## Start Puzzle Processing
+##
+## https://adventofcode.com/2019/day/3#part2
 ################################################
 
 # read puzzle input
 inputs = open('test.txt', 'r').readlines()
 
 # plot lines
-line1 = plotPoints(inputs[0])
-line2 = plotPoints(inputs[1])
+path1 = plotPoints(inputs[0])
+path2 = plotPoints(inputs[1])
 
 # hash the stringified coordinates
 line1PointSet = set()
-line1PointSet.update( obj.s for obj in line1 )
+line1PointSet.update( obj.s for obj in path1 )
 line2PointSet = set()
-line2PointSet.update( obj.s for obj in line2 )
+line2PointSet.update( obj.s for obj in path2 )
 
 # find common points in both sets - these represent
 # the line intersections
@@ -127,13 +138,15 @@ diff = line1PointSet.intersection(line2PointSet)
 # mark the points that intersect in the line lists
 # TODO Refactor to lambda object query (LINQ)
 for hash in diff:
-    for index in range(len(line1)):
-        if hash == line1[index].s:
-            line1[index].intersection = True
+    for index in range(len(path1)):
+        if hash == path1[index].s:
+            path1[index].intersection = True
 
-    for index in range(len(line2)):
-        if hash == line2[index].s:
-            line2[index].intersection = True
+    for index in range(len(path2)):
+        if hash == path2[index].s:
+            path2[index].intersection = True
 
 # walk the steps to get to each intersection
+result = calculateShortestPath(path1, diff) + calculateShortestPath(path2, diff)
+print (str(result))
 
