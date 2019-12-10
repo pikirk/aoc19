@@ -106,11 +106,27 @@ def calculateShortestPath(path:list, intersections:set) -> int:
         for p in path:
             c = c + 1
             if ( (p.intersection and p.s == pt) and p.s != '0,0'):
-                segments.append(c)
+                segments.append(c-1)
                 c = 0
-            
+    if (any(segments)):       
+        return min(segments)
+    else:
+        return segments
 
-    return min(segments)
+def findIntersections(path:[]) -> set:
+    """
+    Finds coordinates where a path intersects itself
+    """
+    retval = set()
+    seen = set()
+    for c in path:
+        xy = Point.toString(c.x, c.y)
+        if xy not in seen:
+            seen.add(xy)
+        else:
+            retval.add(xy)
+    return retval
+
 
 ################################################
 ## Start Puzzle Processing
@@ -125,15 +141,23 @@ inputs = open('test.txt', 'r').readlines()
 path1 = plotPoints(inputs[0])
 path2 = plotPoints(inputs[1])
 
+# find intersection within each line
+int1 = findIntersections(path1)
+int2 = findIntersections(path2)
+
 # hash the stringified coordinates
 line1PointSet = set()
-line1PointSet.update( obj.s for obj in path1 )
+line1PointSet.update( (obj.s for obj in path1) )
 line2PointSet = set()
-line2PointSet.update( obj.s for obj in path2 )
+line2PointSet.update( (obj.s for obj in path2 ) )
 
 # find common points in both sets - these represent
 # the line intersections
+diff = set()
 diff = line1PointSet.intersection(line2PointSet)
+diff.update(int1)
+diff.update(int2)
+
 
 # mark the points that intersect in the line lists
 # TODO Refactor to lambda object query (LINQ)
@@ -149,4 +173,19 @@ for hash in diff:
 # walk the steps to get to each intersection
 result = calculateShortestPath(path1, diff) + calculateShortestPath(path2, diff)
 print (str(result))
+
+
+# # print specs as x,y
+# r = parse(inputs[1])
+# xy = []
+# origin = [0,0]
+# for item in r:
+#     spec = parseSpec(item)
+#     tmp = nextPoint(origin, spec[DIR], spec[LEN])
+#     xy.append(tmp)
+#     origin = tmp
+#     print (tmp)
+
+
+
 
