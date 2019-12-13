@@ -9,10 +9,9 @@ for num in range (start, end, 1):
     index = len(digits)
     double = []
     decreasing = False
-    cur = -1
-
     foundDouble = False
     validDouble = False
+    cur = -1
 
     # walk backwards through the digits
     for i in range( len(digits) - 1, -1, -1 ):
@@ -53,7 +52,7 @@ for num in range (start, end, 1):
     if foundDouble:
         if (validDouble and decreasing):
             met = met + 1
-    elif decreasing:
+    elif decreasing and not foundDouble:
         met = met + 1
 
 print('Met = ' + str(met))
